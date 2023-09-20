@@ -1,7 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:first/firebase_options.dart';
+import 'package:first/views/homepage.dart';
+import 'package:first/views/login_view.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+
 class register_view extends StatefulWidget {
   const register_view({super.key});
 
@@ -12,6 +15,7 @@ class register_view extends StatefulWidget {
 class _register_viewState extends State<register_view> {
   late TextEditingController email;
   late TextEditingController password;
+  int flag = 0;
   @override
   void initState() {
     email = TextEditingController();
@@ -62,23 +66,27 @@ class _register_viewState extends State<register_view> {
                         height: 30),
                   ),
                   Container(
+                    // ignore: sort_child_properties_last
                     child: TextButton(
-                        child: const Text("Register"),
+                        
                         onPressed: () async {
                           final _e = email.text;
                           final _pa = password.text;
-                          try {
-                            final UserCredential = await FirebaseAuth.instance
+                           await FirebaseAuth.instance
                                 .createUserWithEmailAndPassword(
-                                    email: _e, password: _pa);
-                          } on FirebaseAuthException catch (e) {
-                            if (e.code == 'invalid-email')
-                              print('The email address is badly formatted.');
-                            else if (e.code == 'email-already-in-use')
-                              print(
-                                  'The email address is already in use by another account.');
+                                    email: _e, password: _pa).then((userCredential) {
+                                userCredential.user?.sendEmailVerification();
+});
+                                     
+                          if (flag == 0) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const login_view()),
+                            );
                           }
-                        }),
+                        },
+                        child: const Text("verify email")),
                     margin: EdgeInsets.all(10),
                   ),
                 ],
@@ -86,6 +94,3 @@ class _register_viewState extends State<register_view> {
             }));
   }
 }
-
-
-

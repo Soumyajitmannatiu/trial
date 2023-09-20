@@ -26,8 +26,7 @@ class _HomepageState extends State<Homepage> {
     return Scaffold(
         appBar: AppBar(
           title: const Text('BASIC REGISTRATION'),
-          titleTextStyle:
-              TextStyle(fontSize: 20),
+          
         ),
         body: Center(
             child: Column(
