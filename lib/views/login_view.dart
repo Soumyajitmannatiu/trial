@@ -1,5 +1,5 @@
 import 'package:first/firebase_options.dart';
-import 'package:first/main.dart';
+import 'dart:developer' as devtools show log;
 import 'package:first/views/homepage.dart';
 import 'package:first/views/register_view.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +18,8 @@ class _login_viewState extends State<login_view> {
   late TextEditingController password;
   int flag = 0;
   get child => null;
+  
+  get devtools => null;
   @override
   void initState() {
     email = TextEditingController();
@@ -75,15 +77,15 @@ class _login_viewState extends State<login_view> {
                           final _e = email.text;
                           final _pa = password.text;
                           try {
-                            final UserCredential = await FirebaseAuth.instance
+                             await FirebaseAuth.instance
                                 .signInWithEmailAndPassword(
                                     email: _e, password: _pa);
                           } on FirebaseAuthException catch (e) {
                             flag = 1;
                             if (e.code == 'user-not-found') {
-                              print("User account does not exists");
+                              devtools.log("User account does not exists");
                             } else {
-                              print(e.code);
+                              devtools.log(e.code);
                             }
                           }
                           final user = FirebaseAuth.instance.currentUser;
@@ -91,10 +93,10 @@ class _login_viewState extends State<login_view> {
                             case ConnectionState.done:
                               if (user?.emailVerified ?? false) {
                                 if (flag == 0) {
-                                  Navigator.push(
+                                  Navigator.pushAndRemoveUntil(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => home_screen()));
+                                          builder: (context) => home_screen()),(route)=>false);
                                 }
                               } else {
                                 Navigator.push(
@@ -110,9 +112,10 @@ class _login_viewState extends State<login_view> {
                   ),
                   TextButton(
                       onPressed: () {
-                        Navigator.pop(context);
+                        Navigator.of(context).push(MaterialPageRoute(
+                                        builder: (context) => register_view()));
                       },
-                      child: const Text('Go back'))
+                      child: const Text("Don't have an Account, get registered"))
                 ],
               );
             }));
@@ -134,8 +137,12 @@ class _verifyEmailState extends State<verifyEmail> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-                'Email not veirfied yet plz check your email and click on the link for verification when done log in again to enter the account'),
+            Container(
+              child: Text(
+                  'Email not veirfied yet plz check your email and click on the link for verification when done log in again to enter the account'),
+                  margin: EdgeInsets.all(30)
+                  
+            ),
             TextButton(
                 onPressed: () {
                   Navigator.pop(context);

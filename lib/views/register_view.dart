@@ -75,9 +75,7 @@ class _register_viewState extends State<register_view> {
                            await FirebaseAuth.instance
                                 .createUserWithEmailAndPassword(
                                     email: _e, password: _pa).then((userCredential) {
-                                userCredential.user?.sendEmailVerification();
-});
-                                     
+                                userCredential.user?.sendEmailVerification();});                                 
                           if (flag == 0) {
                             Navigator.push(
                               context,
