@@ -63,6 +63,7 @@ class _HomepageState extends State<Homepage> {
     return Scaffold(
         appBar: AppBar(
           title: const Text('BASIC REGISTRATION'),
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         ),
         body: Center(
             child: Column(

@@ -22,6 +22,7 @@ final List<int> colorCodes = <int>[600, 500, 100];
     return Scaffold(
       appBar: AppBar(
         title: const Text("welcome!"),
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           PopupMenuButton<MenuAction>(
             onSelected: (value) async {

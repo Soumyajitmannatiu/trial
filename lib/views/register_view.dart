@@ -32,7 +32,10 @@ class _register_viewState extends State<register_view> {
 
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text("Register")),
+        appBar: AppBar(
+          title: const Text("Register"),
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        ),
         body: FutureBuilder(
             future: Firebase.initializeApp(
               options: DefaultFirebaseOptions.currentPlatform,
@@ -68,14 +71,22 @@ class _register_viewState extends State<register_view> {
                   Container(
                     // ignore: sort_child_properties_last
                     child: TextButton(
-                        
                         onPressed: () async {
                           final _e = email.text;
                           final _pa = password.text;
-                           await FirebaseAuth.instance
+                          try {
+                            await FirebaseAuth.instance
                                 .createUserWithEmailAndPassword(
-                                    email: _e, password: _pa).then((userCredential) {
-                                userCredential.user?.sendEmailVerification();});                                 
+                                    email: _e, password: _pa)
+                                .then((userCredential) {
+                              userCredential.user?.sendEmailVerification();
+                            });
+                          } on FirebaseAuthException catch (e) {
+                            flag = 1;
+                            if (e.code == 'invalid-email') {
+                              await verifying(context, 'Invalid Email');
+                            }
+                          }
                           if (flag == 0) {
                             Navigator.push(
                               context,
@@ -91,4 +102,21 @@ class _register_viewState extends State<register_view> {
               );
             }));
   }
+}
+
+Future verifying(BuildContext context, String b) {
+  return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('$b'),
+          // content: Column(
+          //   children: [
+          //     const Text('Plz wait till we confirm the email'),
+          //     const Text(
+          //         'If you have not verified plz check your email to find verification link')
+          //   ],
+          // ),
+        );
+      });
 }
