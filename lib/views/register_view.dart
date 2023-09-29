@@ -1,9 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:first/firebase_options.dart';
-import 'package:first/views/homepage.dart';
+import 'package:first/auth/auth_service.dart';
+import 'package:first/auth/firebase_auth_provider.dart';
+import 'package:first/auth/authException.dart';
 import 'package:first/views/login_view.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 class register_view extends StatefulWidget {
   const register_view({super.key});
@@ -15,7 +14,6 @@ class register_view extends StatefulWidget {
 class _register_viewState extends State<register_view> {
   late TextEditingController email;
   late TextEditingController password;
-  int flag = 0;
   @override
   void initState() {
     email = TextEditingController();
@@ -37,9 +35,7 @@ class _register_viewState extends State<register_view> {
           backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         ),
         body: FutureBuilder(
-            future: Firebase.initializeApp(
-              options: DefaultFirebaseOptions.currentPlatform,
-            ),
+            future: AuthService.firebase().initialize(),
             builder: (context, snapshot) {
               return Column(
                 children: [
@@ -75,23 +71,25 @@ class _register_viewState extends State<register_view> {
                           final _e = email.text;
                           final _pa = password.text;
                           try {
-                            await FirebaseAuth.instance
-                                .createUserWithEmailAndPassword(
-                                    email: _e, password: _pa)
-                                .then((userCredential) {
-                              userCredential.user?.sendEmailVerification();
-                            });
-                          } on FirebaseAuthException catch (e) {
-                            flag = 1;
-                            if (e.code == 'invalid-email') {
-                              await verifying(context, 'Invalid Email');
-                            }
+                            await AuthService.firebase().createuser(
+                              email: _e,
+                              password: _pa,
+                            );
+                          } on InvalidEmail {
+                            await verifying(context, 'Inavalid email');
+                          } on UserNotRegistered {
+                            await verifying(context, 'User not registered');
+                          }on GenericException{
+                            await verifying(context, 'Something is wrong'); 
+                          }on UsernotloggedIn{
+                            await verifying(context, 'Something went wrong_2'); 
                           }
                           if (flag == 0) {
+                            await AuthService.firebase().verifyEmail();
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => const login_view()),
+                                  builder: (context) => const verifyEmail()),
                             );
                           }
                         },
@@ -110,6 +108,14 @@ Future verifying(BuildContext context, String b) {
       builder: (context) {
         return AlertDialog(
           title: Text('$b'),
+          actions: [
+                TextButton(
+                  child: Text("Ok"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                )
+              ],
           // content: Column(
           //   children: [
           //     const Text('Plz wait till we confirm the email'),

@@ -1,11 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:first/firebase_options.dart';
-import 'package:first/views/homepage.dart';
+
 import 'package:first/views/login_view.dart';
 import 'package:first/views/register_view.dart';
 import 'package:flutter/material.dart';
-import 'dart:developer' as devtools show log;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized;
@@ -69,23 +65,35 @@ class _HomepageState extends State<Homepage> {
             child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const register_view()),
-                  );
-                },
-                child: const Text('New User? ,Get Registered')),
-            TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const login_view()),
-                  );
-                },
-                child: const Text('Already have an account ,Log in'))
+            Container(
+              child: TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const register_view()),
+                    );
+                  },
+                  child: const Text(
+                    'New User? ,Get Registered',
+                    style: TextStyle(fontSize: 25),
+                  )),
+                  margin: EdgeInsets.all(15),
+            ),
+            Container(
+              child: TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const login_view()),
+                    );
+                  },
+                  child: const Text(
+                    'Already have an account ,Log in',
+                    style: TextStyle(fontSize: 25),
+                  )),
+                  margin: EdgeInsets.all(15),
+            )
           ],
         )));
   }

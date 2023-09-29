@@ -1,10 +1,9 @@
-import 'package:first/firebase_options.dart';
+import 'package:first/auth/authException.dart';
+import 'package:first/auth/auth_service.dart';
 import 'dart:developer' as devtools show log;
 import 'package:first/views/homepage.dart';
 import 'package:first/views/register_view.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 late TextEditingController email;
 late TextEditingController password;
@@ -17,7 +16,6 @@ class login_view extends StatefulWidget {
 }
 
 class _login_viewState extends State<login_view> {
-  int flag = 0;
   get child => null;
 
   get devtools => null;
@@ -42,9 +40,7 @@ class _login_viewState extends State<login_view> {
           title: const Text("login"),
         ),
         body: FutureBuilder(
-            future: Firebase.initializeApp(
-              options: DefaultFirebaseOptions.currentPlatform,
-            ),
+            future: AuthService.firebase().initialize(),
             builder: (context, snapshot) {
               return Column(
                 children: [
@@ -81,28 +77,36 @@ class _login_viewState extends State<login_view> {
                           final _e = email.text;
                           final _pa = password.text;
                           try {
-                            await FirebaseAuth.instance
-                                .signInWithEmailAndPassword(
-                                    email: _e, password: _pa);
-                          } on FirebaseAuthException catch (e) {
-                            flag = 1;
-                            await verifying(context, '$e.code');
+                            await AuthService.firebase().signin(
+                              email: _e,
+                              password: _pa,
+                            );
+                          } on UserNotRegistered {
+                            await verifying(context, 'User not found');
+                          } on InvalidEmail {
+                            await verifying(context, 'Invalid Email');
+                          } on WrongPassword {
+                            await verifying(context, 'Wrong password');
+                          } on GenericException {
+                            await verifying(context, 'Something went wrong');
                           }
-                          final user = FirebaseAuth.instance.currentUser;
+                          final user = AuthService.firebase().user;
                           switch (snapshot.connectionState) {
                             case ConnectionState.done:
                               if (flag == 0) {
-                                if (user?.emailVerified ?? false) {
+                                if (user?.isEmailVerified ?? false) {
                                   Navigator.pushAndRemoveUntil(
                                       context,
                                       MaterialPageRoute(
                                           builder: (context) => home_screen()),
                                       (route) => false);
                                 } else {
+                                  await AuthService.firebase().verifyEmail();
                                   Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => verifyEmail()));
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => verifyEmail()),
+                                  );
                                 }
                               }
                               break;
@@ -142,7 +146,7 @@ class _verifyEmailState extends State<verifyEmail> {
           children: [
             Container(
                 child: Text(
-                  'Email($em) not veirfied yet plz check your email and click on the link for verification when done log in again to enter the account',
+                  'Check your email $em to click on the email verification link that has been sent',
                   style: const TextStyle(fontSize: 20),
                 ),
                 margin: EdgeInsets.all(30)),

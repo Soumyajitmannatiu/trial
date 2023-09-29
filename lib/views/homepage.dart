@@ -1,6 +1,4 @@
-
-import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:first/auth/auth_service.dart';
 import 'package:first/views/login_view.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer' as devtools show log;
@@ -16,7 +14,7 @@ enum MenuAction { logout }
 
 class _home_screenState extends State<home_screen> {
   final List<String> entries = <String>['A', 'B', 'C'];
-final List<int> colorCodes = <int>[600, 500, 100];
+  final List<int> colorCodes = <int>[600, 500, 100];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,11 +28,14 @@ final List<int> colorCodes = <int>[600, 500, 100];
                 case MenuAction.logout:
                   final data = await showLogoutDialog(context);
                   devtools.log(data.toString());
-                    if (data) {
-                      await FirebaseAuth.instance.signOut();
-                      Navigator.of(context)
-                          .pushAndRemoveUntil(MaterialPageRoute(builder: (BuildContext context)=>const login_view()), (_) => false);
-                    }
+                  if (data) {
+                    await AuthService.firebase().logout();
+                    Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                            builder: (BuildContext context) =>
+                                const login_view()),
+                        (_) => false);
+                  }
               }
             },
             itemBuilder: (context) {
@@ -48,16 +49,15 @@ final List<int> colorCodes = <int>[600, 500, 100];
         ],
       ),
       body: ListView.builder(
-      padding: const EdgeInsets.all(8),
-      itemCount: entries.length,
-      itemBuilder: (context, index) {
-        return Container(
-          height: 50,
-        color: Colors.amber[colorCodes[index]],
-          child:Text('Note ${entries[index]}')
-        );
-      },
-    ),
+        padding: const EdgeInsets.all(8),
+        itemCount: entries.length,
+        itemBuilder: (context, index) {
+          return Container(
+              height: 50,
+              color: Colors.amber[colorCodes[index]],
+              child: Text('Note ${entries[index]}'));
+        },
+      ),
     );
   }
 }
@@ -75,10 +75,11 @@ Future<bool> showLogoutDialog(BuildContext context) {
                   Navigator.of(context).pop(true);
                 },
                 child: const Text('log out')),
-            TextButton(onPressed: () {
-              Navigator.of(context).pop(false);
-            }, 
-            child: Text('cancel'))
+            TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(false);
+                },
+                child: Text('cancel'))
           ],
         );
       }).then((value) => value ?? false);
